@@ -33,6 +33,17 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+        //menambahkan product service dan cart service
     ],
+    'product_service' => [
+    'url' => env('PRODUCT_SERVICE_URL', 'http://localhost:3000'),
+    'timeout' => (int) env('HTTP_TIMEOUT', 5),
+],
+ 
+'cart_service' => [
+    'url' => env('CART_SERVICE_URL', 'http://localhost:3001'),
+    'timeout' => (int) env('HTTP_TIMEOUT', 5),
+],
+
 
 ];
