@@ -1,5 +1,5 @@
 <?php
-
+ 
 namespace App\Exceptions;
  
 use RuntimeException;
@@ -7,4 +7,3 @@ use RuntimeException;
 class OrderConflictException extends RuntimeException
 {
 }
-

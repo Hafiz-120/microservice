@@ -1,10 +1,10 @@
 <?php
- 
+
 namespace App\Http\Requests;
- 
+
 use App\Models\Order;
 use Illuminate\Validation\Rule;
- 
+
 class ListOrdersRequest extends ApiFormRequest
 {
     public function rules(): array
@@ -13,7 +13,7 @@ class ListOrdersRequest extends ApiFormRequest
             'status' => ['nullable', Rule::in([Order::STATUS_PENDING, Order::STATUS_PAID])],
         ];
     }
- 
+
     public function messages(): array
     {
         return [
@@ -21,4 +21,3 @@ class ListOrdersRequest extends ApiFormRequest
         ];
     }
 }
-

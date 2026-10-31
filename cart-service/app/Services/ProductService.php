@@ -1,30 +1,72 @@
 <?php
 
-namespace App\services;
+namespace App\Services;
 
-use illuminate\Support\Facades\Http;
-use illuminate\Support\Facades\Log;
-use throwable;
+use App\Exceptions\ProductNotFoundException;
+use App\Exceptions\ProductServiceUnavailableException;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class productService
+class ProductService
 {
     public function getProduct(int $productId): array
     {
+        $baseUrl = rtrim((string) config('services.product_service.url'), '/');
+        $timeout = min(5, max(1, (int) config('services.product_service.timeout', 5)));
+        $url = "{$baseUrl}/products/{$productId}";
+
         try {
-            $response = Http::get(config('services.product.base_url'))
-            >get("/products/{$productId}");
-
-            if ($response->successful() && isset($response->json()['data'])) {
-                return $response->json()['data'];
-            }
-
-            return null;
-        } catch (Throwable $e) {
-            log::error('Gagal mengambil data product',[
+            $response = Http::timeout($timeout)
+                ->acceptJson()
+                ->get($url);
+        } catch (ConnectionException $e) {
+            Log::error('Product service tidak dapat dihubungi', [
                 'product_id' => $productId,
+                'url' => $url,
+                'timeout' => $timeout,
                 'error' => $e->getMessage(),
             ]);
-            return null;
+
+            throw new ProductServiceUnavailableException(
+                'Product service tidak dapat dihubungi, coba lagi nanti',
+                $e,
+            );
         }
+
+        if ($response->status() === 404) {
+            throw new ProductNotFoundException($productId);
+        }
+
+        if ($response->failed()) {
+            Log::error('Product service membalas error', [
+                'product_id' => $productId,
+                'url' => $url,
+                'status' => $response->status(),
+            ]);
+
+            throw new ProductServiceUnavailableException(
+                "Product service membalas HTTP {$response->status()}",
+            );
+        }
+
+        $product = $response->json('data');
+        if (
+            ! is_array($product)
+            || ! isset($product['id'], $product['name'], $product['price'], $product['stock'])
+            || ! is_numeric($product['id'])
+            || ! is_string($product['name'])
+            || ! is_numeric($product['price'])
+            || ! is_numeric($product['stock'])
+        ) {
+            Log::error('Respons product-service tidak sesuai kontrak', [
+                'product_id' => $productId,
+                'url' => $url,
+            ]);
+
+            throw new ProductServiceUnavailableException('Respons product-service tidak valid');
+        }
+
+        return $product;
     }
 }

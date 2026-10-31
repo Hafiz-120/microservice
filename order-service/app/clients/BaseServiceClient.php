@@ -58,7 +58,7 @@ abstract class BaseServiceClient
     protected function failOnError(Response $response, string $method, string $path): void
     {
         if ($response->failed()) {
-Log::error("{$this->name} membalas error", [
+            Log::error("{$this->name} membalas error", [
                 'service' => $this->name,
                 'method' => $method,
                 'url' => $this->baseUrl() . $path,

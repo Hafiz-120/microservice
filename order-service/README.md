@@ -56,3 +56,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Order Service API
+
+Semua endpoint Order Service menggunakan prefix `/api`:
+
+- `GET /api/health`
+- `POST /api/orders` dengan JSON `{"user_id": 1}`
+- `GET /api/orders/user/{userId}`
+- `GET /api/orders/{id}`
+- `PATCH /api/orders/{id}/pay`
+
+Respons sukses menggunakan field `message` dan `data`. Validasi request membalas
+`422`, pesanan atau produk yang tidak ditemukan membalas `404`, aturan bisnis
+membalas `409`, dan kegagalan service eksternal membalas `503`.

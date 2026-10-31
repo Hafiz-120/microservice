@@ -1,0 +1,279 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-29T07:55:00.000Z",
+  "__export_source": "insomnia.desktop.app",
+  "resources": [
+    {
+      "_id": "wrk_order_service",
+      "parentId": null,
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "name": "Order Service API",
+      "description": "Request checkout, pencarian, dan pembayaran pesanan.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_order_service",
+      "parentId": "wrk_order_service",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "name": "Base Environment",
+      "data": {
+        "order_base_url": "http://localhost:3003",
+        "cart_base_url": "http://localhost:3001",
+        "user_id": 99999,
+        "product_id": 5,
+        "quantity": 1,
+        "order_id": "ISI_DARI_RESPONS_CHECKOUT"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "order_base_url",
+          "cart_base_url",
+          "user_id",
+          "product_id",
+          "quantity",
+          "order_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_cart",
+      "parentId": "wrk_order_service",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "name": "01 - Cart",
+      "description": "Menambahkan item uji dan memeriksa isi keranjang.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_add_cart",
+      "parentId": "fld_cart",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.cart_base_url }}/carts",
+      "name": "Add product to cart",
+      "description": "POST ini menambah quantity jika produk sudah ada di keranjang. Untuk data uji yang sudah dibuat, jangan jalankan lagi sebelum checkout.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user_id\": {{ _.user_id }},\n  \"product_id\": {{ _.product_id }},\n  \"quantity\": {{ _.quantity }}\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_cart",
+      "parentId": "fld_cart",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.cart_base_url }}/carts/{{ _.user_id }}",
+      "name": "Get test user's cart",
+      "description": "Periksa keranjang sebelum checkout.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_orders",
+      "parentId": "wrk_order_service",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "name": "02 - Orders",
+      "description": "Jalankan Checkout setelah keranjang berisi product yang valid.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 2,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_health",
+      "parentId": "fld_orders",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.order_base_url }}/api/health",
+      "name": "Health",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_checkout",
+      "parentId": "fld_orders",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.order_base_url }}/api/orders",
+      "name": "Checkout cart",
+      "description": "Respons 201 menyediakan ID pesanan. Salin data.id ke variabel order_id di Base Environment.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user_id\": {{ _.user_id }}\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_list_user",
+      "parentId": "fld_orders",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.order_base_url }}/api/orders/user/{{ _.user_id }}",
+      "name": "List user's orders",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_order",
+      "parentId": "fld_orders",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.order_base_url }}/api/orders/{{ _.order_id }}",
+      "name": "Get order by ID",
+      "description": "Atur order_id dari nilai data.id pada respons Checkout cart.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_pay_order",
+      "parentId": "fld_orders",
+      "modified": 1793253300000,
+      "created": 1793253300000,
+      "url": "{{ _.order_base_url }}/api/orders/{{ _.order_id }}/pay",
+      "name": "Pay order",
+      "description": "PATCH, bukan PUT. Hanya bisa untuk pesanan berstatus PENDING.",
+      "method": "PATCH",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}

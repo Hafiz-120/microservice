@@ -1,7 +1,7 @@
 <?php
- 
+
 namespace App\Http\Requests;
- 
+
 class CreateOrderRequest extends ApiFormRequest
 {
     public function rules(): array
@@ -10,7 +10,7 @@ class CreateOrderRequest extends ApiFormRequest
             'user_id' => ['required', 'integer', 'min:1', 'max:999999999'],
         ];
     }
- 
+
     public function messages(): array
     {
         return [

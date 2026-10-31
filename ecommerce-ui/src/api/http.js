@@ -1,55 +1,43 @@
-
 const TIMEOUT_MS = 5000;
 
 export class ApiError extends Error {
-    constructor(message, status = 0, errors = null) {
-        super(message);
-        this.name = "ApiError";
-        this.status = status;
-        this.errors = errors;
-    }
+  constructor(message, { status = 0, errors = null } = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.errors = errors;
+  }
 }
 
-export async function request(baseUrl, path, method = "GET", body = null) {
-    const controller = new AbortController();
+export async function request(baseUrl, path, { method = 'GET', body } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const response = await fetch(`S{baseUrl}${path}`, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal
+    });
 
-    try {
-        const response = await fetch(`${baseUrl}${path}`, {
-            method,
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-            body: body === null ? null : JSON.stringify(body),
-            signal: controller.signal,
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new ApiError(payload?.message ?? 'permintan gagal (${requestse.status})', {
+            status: response.status,
+            errors: payload?.errors ?? null,
         });
-
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-            throw new ApiError(
-                data?.message || "Terjadi kesalahan pada API",
-                response.status,
-                data?.errors || null
-            );
-        }
-
-        return data;
-    } catch (error) {
-        if (error instanceof ApiError) {
-            throw error;
-        }
-
-        if (error.name === "AbortError") {
-            throw new ApiError("Request timeout setelah 5 detik");
-        }
-
-        throw new ApiError(
-            error.message || "Gagal menghubungi server"
-        );
-    } finally {
-        clearTimeout(timer);
     }
+
+    return payload
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    if (error.name === 'AbortError') throw new ApiEror('server terlalu lama menjawab')
+
+        
+  }
 }

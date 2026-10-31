@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\ExternalServiceException;
 use App\Exceptions\OrderConflictException;
 use App\Exceptions\OrderNotFoundException;
+use App\Exceptions\ProductNotFoundException;
 use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\ListOrdersRequest;
@@ -30,6 +31,8 @@ class OrderController extends Controller
             return $this->success('Pesanan berhasil dibuat', $order, 201);
         } catch (OrderConflictException $e) {
             return $this->conflict($e, ['user_id' => $userId]);
+        } catch (ProductNotFoundException $e) {
+            return $this->notFound($e);
         } catch (ExternalServiceException $e) {
             return $this->unavailable($e);
         } catch (Throwable $e) {

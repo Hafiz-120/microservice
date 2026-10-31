@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'product_service' => [
+        'url' => env('PRODUCT_SERVICE_URL', 'http://localhost:3000'),
+        'timeout' => (int) env('HTTP_TIMEOUT', 5),
+    ],
+
 ];
