@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CartItemNotFoundException;
+use App\Exceptions\CartStockExceededException;
 use App\Exceptions\ProductNotFoundException;
 use App\Exceptions\ProductServiceUnavailableException;
 use App\Http\Requests\AddCartItemRequest;
@@ -60,6 +61,10 @@ class CartController extends Controller
             return response()->json([
                 'message' => 'Product service tidak tersedia, coba lagi nanti',
             ], 503);
+        } catch (CartStockExceededException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'menambahkan item');
         }
@@ -84,6 +89,18 @@ class CartController extends Controller
             return response()->json([
                 'message' => $e->getMessage()
             ], 404);
+        } catch (ProductNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
+        } catch (ProductServiceUnavailableException $e) {
+            return response()->json([
+                'message' => 'Product service tidak tersedia, coba lagi nanti',
+            ], 503);
+        } catch (CartStockExceededException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (Throwable $e) {
             return $this->errorResponse($e, 'memperbarui item');
         }

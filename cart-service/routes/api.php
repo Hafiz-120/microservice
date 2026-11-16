@@ -3,6 +3,11 @@
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/health', fn () => response()->json([
+    'status' => 'ok',
+    'service' => 'cart-service',
+]));
+
 Route::get('/carts/{userId}', [CartController::class, 'show'])
     ->whereNumber('userId');
 

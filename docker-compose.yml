@@ -10,6 +10,12 @@ services:
       DB_USER: appuser
       DB_PASSWORD: apppassword
       DB_NAME: productdb
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
     depends_on:
       product-db:
         condition: service_healthy
@@ -47,12 +53,19 @@ services:
       DB_USERNAME: appuser
       DB_PASSWORD: apppassword
       PRODUCT_SERVICE_URL: http://product-service:3000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
       LOG_CHANNEL: stderr
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:3001/health') === false ? 1 : 0);"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 5s
     depends_on:
       cart-db:
         condition: service_healthy
       product-service:
-        condition: service_started
+        condition: service_healthy
 
   cart-db:
     image: postgres:16-alpine
@@ -106,14 +119,21 @@ services:
       PRODUCT_SERVICE_URL: http://product-service:3000
       CART_SERVICE_URL: http://cart-service:3001
       HTTP_TIMEOUT: "5"
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
       LOG_CHANNEL: stderr
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:3003/api/health') === false ? 1 : 0);"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 5s
     depends_on:
       order-db:
         condition: service_healthy
       product-service:
-        condition: service_started
+        condition: service_healthy
       cart-service:
-        condition: service_started
+        condition: service_healthy
 
   review-service:
     build:
@@ -128,11 +148,44 @@ services:
       MONGO_URI: mongodb://appuser:apppassword@review-db:27017/?authSource=admin
       MONGO_DB_NAME: reviewdb
       PRODUCT_SERVICE_URL: http://product-service:3000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3002/health', timeout=3)"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 5s
     depends_on:
       review-db:
         condition: service_healthy
       product-service:
-        condition: service_started
+        condition: service_healthy
+
+  ecommerce-ui:
+    build:
+      context: ./ecommerce-ui
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_PRODUCT_URL: http://localhost:3000
+      VITE_CART_URL: http://localhost:3001
+      VITE_REVIEW_URL: http://localhost:3002
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173/').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      retries: 5
+      start_period: 15s
+      timeout: 5s
+    depends_on:
+      product-service:
+        condition: service_healthy
+      cart-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      review-service:
+        condition: service_healthy
 
   review-db:
     image: mongo:7

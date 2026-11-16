@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\CartItemNotFoundException;
+use App\Exceptions\CartStockExceededException;
 use App\Models\CartItem;
 
 class CartService
@@ -24,14 +25,17 @@ class CartService
 
     public function addItem(int $userId, int $productId, int $quantity): CartItem
     {
-        $this->productService->getProduct($productId);
+        $product = $this->productService->getProduct($productId);
 
         $item = CartItem::firstOrNew([
             'user_id' => $userId,
             'product_id' => $productId
         ]);
 
-        $item->quantity = ($item->exists ? $item->quantity : 0) + $quantity;
+        $newQuantity = ($item->exists ? $item->quantity : 0) + $quantity;
+        $this->ensureQuantityAvailable($newQuantity, (int) $product['stock']);
+
+        $item->quantity = $newQuantity;
 
         $item->save();
 
@@ -47,11 +51,19 @@ class CartService
             throw new CartItemNotFoundException($id);
         }
 
-        $item->update([
-            'quantity' => $quantity
-        ]);
+        $product = $this->productService->getProduct($item->product_id);
+        $this->ensureQuantityAvailable($quantity, (int) $product['stock']);
+
+        $item->update(['quantity' => $quantity]);
 
         return $item;
+    }
+
+    private function ensureQuantityAvailable(int $quantity, int $stock): void
+    {
+        if ($quantity > $stock) {
+            throw new CartStockExceededException($stock);
+        }
     }
 
 

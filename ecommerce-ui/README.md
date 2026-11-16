@@ -1,16 +1,39 @@
-# React + Vite
+# Ecommerce UI and services
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Run with Docker Compose
 
-Currently, two official plugins are available:
+From the repository root, start the complete application:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+docker compose up --build -d
+```
 
-## React Compiler
+Open the UI at <http://localhost:5173>. The API services are published on
+ports 3000 (products), 3001 (cart), 3002 (reviews), and 3003 (orders).
+Compose waits for each service health check before starting its dependents.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+To inspect startup or service errors:
 
-## Expanding the ESLint configuration
+```powershell
+docker compose ps
+docker compose logs -f ecommerce-ui cart-service product-service review-service order-service
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Stop the application without removing its database data:
+
+```powershell
+docker compose down
+```
+
+## Run the UI outside Docker
+
+Start the backend services from the repository root with `docker compose up -d`,
+then run these commands in `ecommerce-ui`:
+
+```powershell
+npm ci
+npm run dev
+```
+
+The UI uses the `VITE_PRODUCT_URL`, `VITE_CART_URL`, and `VITE_REVIEW_URL`
+values from `.env`. These URLs must be reachable by the browser.
