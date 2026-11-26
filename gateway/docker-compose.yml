@@ -1,0 +1,9 @@
+services:
+  gateway:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PRODUCT_URL: http://host.docker.internal:3000
+      CART_URL: http://host.docker.internal:3001
+      REVIEW_URL: http://host.docker.internal:3002
